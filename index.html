@@ -1,15 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-HXSW124S2T"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HXSW124S2T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-HXSW124S2T');
+  </script>
 
-  gtag('config', 'G-HXSW124S2T');
-</script>
+  <meta charset="UTF-8" />
+  <title>Alex Tukallo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Personal homepage of Alex Tukallo.">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="atukallo_favicon.jpg" type="image/jpg">
+
+  <link rel="stylesheet" type="text/css" href="mystyle.css" />
+</head>
 
 
-Something big is coming. Behold.
 
-What will it be?
+<body>
+  <header>
+    <h1>Welcome to Alex Tukallo's homepage</h1>
+  </header>
+  <main>
+    <div class="portrait-container">
+      <picture>
+        <source srcset="atukallo_square_small.jpg" media="(max-width: 240px)">
+        <source srcset="atukallo_square_medium.jpg" media="(max-width: 360px)">
+        <img src="atukallo_square_large.jpg" alt="Portrait of Alex Tukallo" class="portrait">
+      </picture>
+    </div>
+
+    <div class="main-text">
+      <p>I work on deep learning for algorithmic trading at <a href="https://www.hudsonrivertrading.com/">HRT</a>. I started in August 2022 as an Algorithm Developer on HAIL - HRT AI Labs. I currently live in London.</p>
+      <p>Before that I studied Applied Mathematics at ETH Zürich and Computer Science at ITMO University in St. Petersburg.</p>
+      <p>Feel free to send me an email at {my first name} (at) {my last name} (dot) com. </p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="updated">Last updated: April 2025</div>
+  </footer>
+
+</body>
+</html>
+
