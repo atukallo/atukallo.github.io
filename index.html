@@ -20,6 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="icon" href="atukallo_favicon.jpg" type="image/jpg">
+  <link rel="preload" href="atukallo_boomerang.gif" as="image" media="(min-width: 361px)">
 
   <link rel="stylesheet" type="text/css" href="mystyle.css" />
 </head>
@@ -35,7 +36,7 @@
       <picture>
         <source srcset="atukallo_square_small.jpg" media="(max-width: 240px)">
         <source srcset="atukallo_square_medium.jpg" media="(max-width: 360px)">
-        <img src="atukallo_square_large.jpg" alt="Portrait of Alex Tukallo" class="portrait">
+        <img id="portrait_image" src="atukallo_square_large.jpg" alt="Portrait of Alex Tukallo" class="portrait">
       </picture>
     </div>
 
@@ -49,6 +50,29 @@
   <footer>
     <div class="updated">Last updated: May 2025</div>
   </footer>
+
+<script>
+  const portrait = document.getElementById('portrait_image');
+  const staticImage = 'atukallo_square_large.jpg';
+  const gifImage = 'atukallo_boomerang.gif';
+
+  function shouldEnableGif() {
+    return window.matchMedia("(min-width: 361px)").matches;
+  }
+
+  portrait.addEventListener('mouseenter', () => {
+    if (shouldEnableGif()) {
+      portrait.src = gifImage + '?t=' + new Date().getTime();
+    }
+  });
+
+  portrait.addEventListener('mouseleave', () => {
+    if (shouldEnableGif()) {
+      portrait.src = staticImage;
+    }
+  });
+</script>
+
 
 </body>
 </html>
