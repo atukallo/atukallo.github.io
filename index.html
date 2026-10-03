@@ -29,14 +29,14 @@
   </header>
   <main>
     <div class="portrait-container">
-      <div class="portrait-frame">
+      <button type="button" class="portrait-frame" aria-label="Play portrait animation" aria-pressed="false">
         <img id="portrait_image" src="atukallo_square_large.jpg"
           srcset="atukallo_square_small.jpg 240w, atukallo_square_medium.jpg 360w, atukallo_square_large.jpg 480w, atukallo_square_920.jpg 920w"
           sizes="(max-width: 492px) calc(100vw - 2rem), 460px"
           width="480" height="480" alt="Portrait of Alex Tukallo" class="portrait">
         <video id="portrait_video" class="portrait-video" muted loop playsinline
-          preload="none" aria-hidden="true" tabindex="-1"></video>
-      </div>
+          src="atukallo_boomerang.mp4" preload="auto" aria-hidden="true" tabindex="-1"></video>
+      </button>
     </div>
 
     <div class="main-text">
@@ -53,66 +53,68 @@
 <script>
   const frame = document.querySelector('.portrait-frame');
   const video = document.getElementById('portrait_video');
-  const animationAllowed = window.matchMedia(
+  const hoverAllowed = window.matchMedia(
     '(hover: hover) and (prefers-reduced-motion: no-preference)'
   );
-  let hovering = false;
+  let playbackMode = null;
   let playbackRequest = 0;
 
-  function resetPortrait() {
-    playbackRequest++;
-    frame.classList.remove('is-playing');
-    video.pause();
-    if (video.readyState > 0) video.currentTime = 0;
+  function updateControl(playing) {
+    frame.setAttribute('aria-pressed', String(playing));
+    frame.setAttribute('aria-label', playing ? 'Pause portrait animation' : 'Play portrait animation');
   }
 
-  function updateAnimationEligibility() {
-    if (animationAllowed.matches) {
-      // Assign a stable URL only on devices where the animation can be used.
-      if (!video.hasAttribute('src')) {
-        video.preload = 'auto';
-        video.src = 'atukallo_boomerang.mp4';
-        video.load();
-      }
-    } else {
-      hovering = false;
-      resetPortrait();
-      video.removeAttribute('src');
-      video.preload = 'none';
-      video.load();
+  function pauseAnimation(reset = false) {
+    playbackRequest++;
+    playbackMode = null;
+    video.pause();
+    updateControl(false);
+    if (reset) {
+      frame.classList.remove('is-playing');
+      if (video.readyState > 0) video.currentTime = 0;
     }
   }
 
-  frame.addEventListener('pointerenter', async (event) => {
-    if (event.pointerType === 'touch' || !animationAllowed.matches) return;
-    hovering = true;
+  async function playAnimation(mode) {
+    playbackMode = mode;
     const request = ++playbackRequest;
+    updateControl(true);
     try {
       await video.play();
-      // Keep the photo visible until playback starts, and ignore stale requests.
-      if (request === playbackRequest && hovering && animationAllowed.matches) {
+      // Keep the photo visible until playback starts; ignore cancelled requests.
+      if (request === playbackRequest && playbackMode) {
         frame.classList.add('is-playing');
       }
     } catch {
-      // A blocked or failed video leaves the static portrait visible.
-      if (request === playbackRequest) resetPortrait();
+      if (request === playbackRequest) pauseAnimation(true);
     }
-  });
-
-  function stopAnimation() {
-    hovering = false;
-    resetPortrait();
   }
 
-  frame.addEventListener('pointerleave', stopAnimation);
-  frame.addEventListener('pointercancel', stopAnimation);
-  video.addEventListener('error', stopAnimation);
-  window.addEventListener('blur', stopAnimation);
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stopAnimation();
+  frame.addEventListener('pointerenter', (event) => {
+    if (event.pointerType !== 'touch' && hoverAllowed.matches && !playbackMode) {
+      playAnimation('hover');
+    }
   });
-  animationAllowed.addEventListener('change', updateAnimationEligibility);
-  updateAnimationEligibility();
+  frame.addEventListener('pointerleave', (event) => {
+    // Touch pointers leave after each tap; only end hover-driven playback here.
+    if (event.pointerType !== 'touch' && playbackMode === 'hover') pauseAnimation(true);
+  });
+  frame.addEventListener('pointercancel', () => {
+    if (playbackMode === 'hover') pauseAnimation(true);
+  });
+  // Native button clicks support touch, mouse, Enter, and Space.
+  frame.addEventListener('click', () => {
+    if (playbackMode) pauseAnimation();
+    else playAnimation('toggle');
+  });
+  video.addEventListener('error', () => pauseAnimation(true));
+  window.addEventListener('blur', () => pauseAnimation(true));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) pauseAnimation(true);
+  });
+  hoverAllowed.addEventListener('change', () => {
+    if (playbackMode === 'hover') pauseAnimation(true);
+  });
 </script>
 
 
