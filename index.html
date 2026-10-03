@@ -16,11 +16,7 @@
   <title>Alex Tukallo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Personal homepage of Alex Tukallo.">
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="icon" href="atukallo_favicon.jpg" type="image/jpg">
-  <link rel="preload" href="atukallo_boomerang.gif" as="image" media="(min-width: 361px)">
 
   <link rel="stylesheet" type="text/css" href="mystyle.css" />
 </head>
@@ -33,15 +29,18 @@
   </header>
   <main>
     <div class="portrait-container">
-      <picture>
-        <source srcset="atukallo_square_small.jpg" media="(max-width: 240px)">
-        <source srcset="atukallo_square_medium.jpg" media="(max-width: 360px)">
-        <img id="portrait_image" src="atukallo_square_large.jpg" alt="Portrait of Alex Tukallo" class="portrait">
-      </picture>
+      <div class="portrait-frame">
+        <img id="portrait_image" src="atukallo_square_large.jpg"
+          srcset="atukallo_square_small.jpg 240w, atukallo_square_medium.jpg 360w, atukallo_square_large.jpg 480w, atukallo_square_920.jpg 920w"
+          sizes="(max-width: 492px) calc(100vw - 2rem), 460px"
+          width="480" height="480" alt="Portrait of Alex Tukallo" class="portrait">
+        <video id="portrait_video" class="portrait-video" muted loop playsinline
+          preload="none" aria-hidden="true" tabindex="-1"></video>
+      </div>
     </div>
 
     <div class="main-text">
-      <p>I work on deep learning for algorithmic trading at <a href="https://www.hudsonrivertrading.com/">HRT</a>. I started in August 2022 as an Algorithm Developer on HAIL - HRT AI Labs. I currently live in London.</p>
+      <p>I work on deep learning for algorithmic trading at <a href="https://www.hudsonrivertrading.com/">HRT</a>. I started in August 2022 as an Algorithm Developer on HAIL - HRT AI Labs. I'm also a co-founder of <a href="https://mycity3d.uk">mycity3d.uk</a>. I currently live in London.</p>
       <p>Before that I studied Applied Mathematics at ETH Zürich and Computer Science at ITMO University in St. Petersburg.</p>
       <p>Feel free to send me an email at {my first name} (dot) {my last name} (at) gmail (dot) com. Or drop a message in Telegram: @atukallo. </p>
     </div>
@@ -52,25 +51,68 @@
   </footer>
 
 <script>
-  const portrait = document.getElementById('portrait_image');
-  const staticImage = 'atukallo_square_large.jpg';
-  const gifImage = 'atukallo_boomerang.gif';
+  const frame = document.querySelector('.portrait-frame');
+  const video = document.getElementById('portrait_video');
+  const animationAllowed = window.matchMedia(
+    '(hover: hover) and (prefers-reduced-motion: no-preference)'
+  );
+  let hovering = false;
+  let playbackRequest = 0;
 
-  function shouldEnableGif() {
-    return window.matchMedia("(min-width: 361px)").matches;
+  function resetPortrait() {
+    playbackRequest++;
+    frame.classList.remove('is-playing');
+    video.pause();
+    if (video.readyState > 0) video.currentTime = 0;
   }
 
-  portrait.addEventListener('mouseenter', () => {
-    if (shouldEnableGif()) {
-      portrait.src = gifImage + '?t=' + new Date().getTime();
+  function updateAnimationEligibility() {
+    if (animationAllowed.matches) {
+      // Assign a stable URL only on devices where the animation can be used.
+      if (!video.hasAttribute('src')) {
+        video.preload = 'auto';
+        video.src = 'atukallo_boomerang.mp4';
+        video.load();
+      }
+    } else {
+      hovering = false;
+      resetPortrait();
+      video.removeAttribute('src');
+      video.preload = 'none';
+      video.load();
+    }
+  }
+
+  frame.addEventListener('pointerenter', async (event) => {
+    if (event.pointerType === 'touch' || !animationAllowed.matches) return;
+    hovering = true;
+    const request = ++playbackRequest;
+    try {
+      await video.play();
+      // Keep the photo visible until playback starts, and ignore stale requests.
+      if (request === playbackRequest && hovering && animationAllowed.matches) {
+        frame.classList.add('is-playing');
+      }
+    } catch {
+      // A blocked or failed video leaves the static portrait visible.
+      if (request === playbackRequest) resetPortrait();
     }
   });
 
-  portrait.addEventListener('mouseleave', () => {
-    if (shouldEnableGif()) {
-      portrait.src = staticImage;
-    }
+  function stopAnimation() {
+    hovering = false;
+    resetPortrait();
+  }
+
+  frame.addEventListener('pointerleave', stopAnimation);
+  frame.addEventListener('pointercancel', stopAnimation);
+  video.addEventListener('error', stopAnimation);
+  window.addEventListener('blur', stopAnimation);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopAnimation();
   });
+  animationAllowed.addEventListener('change', updateAnimationEligibility);
+  updateAnimationEligibility();
 </script>
 
 
